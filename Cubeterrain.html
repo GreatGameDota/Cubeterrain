@@ -1,0 +1,576 @@
+<html>
+<head>
+	<title>Cubeterrain</title><!-- PB: 1,141,900 -->
+	<link rel="icon" type="image/x-icon" href="imgs/icon1.png">
+	<style>
+		canvas{
+			background: #ffffff;
+		}
+	</style>
+	<script>
+		var	menuImg = new Image();
+			menuImg.src = "imgs/menu1.png";
+		var timerSpawn = new timerClass(randomNumber(500,0)),//cubes
+			timerSpawn2 = new timerClass(randomNumber(0,0)),//stars
+			timerSpawn3 = new timerClass(randomNumber(2000,0)),//clouds
+			timerHide = "";//"speed up" text
+		function timerClass(timeIntervalMS){
+			this.oldTime = new Date();
+			this.interval = timeIntervalMS;
+			this.increaseInterval = function(){
+				this.interval++;
+				timeIntervalRect++;
+			}
+			this.decreaseInterval = function(){
+				this.interval--;
+				timeIntervalRect--;
+			}
+			this.accum = 0;
+			this.isReady = function(){
+				var curTime = new Date();
+				var delta = curTime - this.oldTime;
+		
+				this.accum += delta;
+				this.oldTime = curTime;
+				if (this.accum > this.interval){
+					this.accum = 0;
+					return true;
+				}
+				else{
+					return false;
+				}
+			}
+		}
+		var squareArray = [];
+		function squareClass(){
+			this.x = randomNumber(scrollx+10000,scrollx-10000);//randomly sets the squares around the player's x pos
+			this.y = 400;
+			this.width = 174/10;//makes the cube very small when it starts moving
+			this.height = 172/10;
+			var randImage = randomNumber(cubeImageArray1[level],cubeImageArray2[level]);//random image
+			this.img = new Image();
+			this.img.src = "imgs/cube" + randImage + ".png";
+
+			this.draw = function(){
+				c.drawImage(this.img, this.x, this.y, this.width, this.height);
+			}
+			this.update = function(){
+				if(this.y<=-310){//if below the screen
+					this.reset();
+				}
+				if(this.intersects(player) && this.y>player.y-player.height){
+					if(gameState=="play"){
+						dead = true;
+					}
+				}
+				this.width = (this.width*((.001*cubeSize)+1))*(1+(cubeSpeed/100));//slowly increases the size based on cubeSpeed
+				this.height = ((this.height*((.001*cubeSize)+1))*(1+(cubeSpeed/100)));//numbers don't really mean anything, just messed with until it looks right
+				this.y += (0-cubeSpeed)*(this.height/25);//moves the cubes down the window based on cubeSpeed
+				this.x += (xvelocity*8)*this.width/(1+(cubeSpeed/20));//moves x pos if you move left or right; faster if image is bigger; based off cubeSpeed also
+			}
+			this.reset = function(){
+				this.x = randomNumber(scrollx+10000,scrollx-10000);
+				this.y = 400;
+				this.width = 174/10;
+				this.height = 172/10;
+				var randImage = randomNumber(cubeImageArray1[level],cubeImageArray2[level]);
+				this.img = new Image();
+				this.img.src = "imgs/cube" + randImage + ".png";
+			}
+			this.intersects = function(obj){
+				if (this.x+25 < obj.x + obj.width &&
+					(this.x+25) + this.width > obj.x &&
+					this.y < obj.y + obj.height &&
+					this.y + this.height > obj.y)
+				{
+					return true;
+				}
+				else{
+					return false;
+				}
+			}
+		}
+		var player = new playerClass();
+		function playerClass(){
+			this.x = 0;
+			this.y = 0;
+			this.width = 80/1.3;
+			this.height = 48/1.3;
+			this.skin = 1;
+			
+			this.img = new Image();
+			this.img.src = "imgs/icon" + this.skin + ".png";
+
+			this.draw = function(){
+				if(this.skin!=3){
+					this.img = new Image();
+					this.img.src = "imgs/icon" + this.skin + ".png";
+				}
+				else{
+					this.img = new Image();
+					this.img.src = "imgs/icon3" + randomNumber(5,1) + ".png";
+				}
+				c.drawImage(this.img,(cWidth/2)-48,cHeight-80,this.width,this.height);
+			}
+		}
+		var starArray = [];
+		function starClass(){
+			this.x = randomNumber(scrollx+10000,scrollx-10000);//randomly sets the stars around the player's x pos
+			this.y = randomNumber(300,-50);
+			this.width = randomNumber(32,8);
+			this.height = this.width;
+			this.img = new Image();
+			this.img.src = "imgs/star.png";
+
+			this.draw = function(){
+				c.drawImage(this.img, this.x, this.y, this.width, this.height);
+			}
+			this.update = function(){
+				if(this.y>=601){//if above the screen
+					this.reset();
+				}
+				this.x += (xvelocity*8)*this.width/(1+(cubeSpeed/20));//moves x pos if you move left or right; faster if image is bigger
+			}
+			this.reset = function(){
+				this.x = randomNumber(scrollx+10000,scrollx-10000);
+				this.y = randomNumber(200,-100);
+				this.width = 32/5;
+				this.height = this.width;
+				this.img = new Image();
+				this.img.src = "imgs/star.png";
+			}
+		}
+		var cloudArray = [];
+		function cloudClass(){
+			this.x = randomNumber(scrollx+10000,scrollx-10000);//randomly sets the clouds around the player's x pos
+			this.y = randomNumber(300,-50);
+			this.width = 1988/1000;//
+			this.height = 1290/1000;
+			this.img = new Image();
+			this.img.src = "imgs/cloud.png";
+
+			this.draw = function(){
+				c.drawImage(this.img, this.x, this.y, this.width, this.height);
+			}
+			this.update = function(){
+				if(this.y>=601){//if above the screen
+					this.reset();
+				}
+				this.width = this.width*1.01201;//slowly increases the size
+				this.height = this.height*1.01201;//numbers don't really mean anything, just messed with until it looks right
+				this.y += this.height/25;//moves the clouds up the window
+				this.x += (xvelocity*8)*this.width/(1+(cubeSpeed/20));//moves x pos if you move left or right; faster if image is bigger
+				this.x -=3;//offput
+			}
+			this.reset = function(){
+				this.x = randomNumber(scrollx+10000,scrollx-10000);
+				this.y = randomNumber(200,-100);
+				this.width = 32/5;//
+				this.height = this.width;
+				this.img = new Image();
+				this.img.src = "imgs/cloud.png";
+			}
+		}
+		var c;
+		var cWidth, cHeight;
+		var curkeys = [];
+		var newkeys = [];
+		
+		var gameState = "intro",
+			inputText = "",
+			degrees = -180,
+			degrees2 = 90,
+			charSpeed = 2,//character speed
+			cubeSpeed = 2,
+			xvelocity = 0,
+			scrollx = 0,
+			dead = false,
+			score = 0,
+			highscore = 0,
+			level = 1,
+			charSpeedArray = ["NA",2,2,2,2.5,2.5,3],
+			cubeSpeedArray = ["NA",2,3,3,3.5,3.75,4],
+			bgGradientArray1 = ["NA","black","black","black","white","black","white"],
+			bgGradientArray2 = ["NA","white","black","white","white","white","white"],
+			skyColorArray = ["NA","#FFFFFF","#000000","#FFFFFF","#FFFFFF","#FFFFFF","#FFFFFF"],
+			cubeImageArray1 = ["NA",3,4,3,5,3,6],
+			cubeImageArray2 = ["NA",1,4,1,5,1,6],
+			drawColorArray = ["NA","#000000","#FFFFFF","#000000","#000000","#000000","#000000"],
+			scoreLevelArray = ["NA",100000,200000,300000,400000,500000],
+			visible = false,
+			cubeSize = 5,//goes from 1-20 but everything else isn't optimized for cubeSize changes
+			coins = 0,
+			boughtArray = [1],
+			priceArray = ["NA",0,0,0,0,0];
+		function gameFrameworkInit(){
+			for (i = 0; i < 256; i++){
+				curkeys[i] = false;
+				newkeys[i] = false;
+			}
+			c = myCanvas.getContext('2d');
+	        window.addEventListener('keydown',
+	        						 function(e){
+										if (!curkeys[e.keyCode]){
+											curkeys[e.keyCode] = true;
+											newkeys[e.keyCode] = true;
+										}
+									 }
+	        					   );
+	        window.addEventListener('keyup',
+	        						 function(e){ curkeys[e.keyCode] = false; }
+	        					   );
+			window.requestAnimationFrame(gameUpdate);
+		}
+		function gameUpdate(){
+			myCanvas.width = window.innerWidth-20;
+			myCanvas.height = window.innerHeight-20;
+			cWidth = myCanvas.width;
+			cHeight = myCanvas.height;//Resizes canvas to fit window
+			loopAmount = squareArray.length;
+			
+			if(gameState=="intro"){
+				if(newkeys[13]){//enter
+					gameState="play";
+					squareArray = [];//resets the cubes
+					loopAmount = 0;
+				}
+				if(newkeys[83]){//s
+					gameState="store";
+					newkeys[83] = false;
+				}
+				if(timerSpawn.isReady()){//spawns cubes over time
+					if(loopAmount<60){
+						squareArray.push(new squareClass());
+						timerSpawn = new timerClass(randomNumber(500,0));//randomly changes when the next cube is made
+					}
+				}
+				for(i=0;i<loopAmount;i++){
+					squareArray[i].update();
+				}
+				degrees2 = 900+((0-(xvelocity*900))/charSpeed);//sets the pos of the squares (very important)
+			}
+			if(gameState=="store"){
+				if(newkeys[83]){//s
+					gameState="intro";
+				}
+				for(i=49;i<54;i++){
+					if(curkeys[i]){
+						buy(i-48);
+						curkeys[i] = false;
+					}
+				}
+				if(timerSpawn.isReady()){//spawns cubes over time
+					if(loopAmount<60){
+						squareArray.push(new squareClass());
+						timerSpawn = new timerClass(randomNumber(500,0));//randomly changes when the next cube is made
+					}
+				}
+				for(i=0;i<loopAmount;i++){
+					squareArray[i].update();
+				}
+				degrees2 = 900+((0-(xvelocity*900))/charSpeed);//sets the pos of the squares (very important)
+			}
+			if(gameState=="play"){
+				score+=100;
+				charSpeed=charSpeedArray[level],
+				cubeSpeed=cubeSpeedArray[level];
+				if(score>=scoreLevelArray[level] && score<=scoreLevelArray[level]+100){//level
+					timerHide = new timerClass(2500);
+					level++;
+					visible=true;
+				}
+				
+				if(curkeys[37]){//left
+					xvelocity+=charSpeed*-0.0025;
+					scrollx+=1;
+				}
+				if(curkeys[39]){//right
+					xvelocity+=charSpeed*0.0025;
+					scrollx-=1;
+				}
+				xvelocity=xvelocity*0.85;
+				degrees = -180+((0-(xvelocity*900))/charSpeed);
+				degrees2 = 900+((0-(xvelocity*900))/charSpeed);//Too make the cubes move with the bg
+				if(timerSpawn.isReady()){
+					if(loopAmount<70){
+						squareArray.push(new squareClass());
+						timerSpawn = new timerClass(randomNumber(500,0));
+					}
+				}
+				for(i=0;i<loopAmount;i++){
+					squareArray[i].update();
+				}
+				if(level==2){
+					if(timerSpawn2.isReady()){//spawns stars over time
+						if(starArray.length<60){//60?
+							starArray.push(new starClass());
+							timerSpawn2 = new timerClass(randomNumber(0,0));//randomly changes when the next star is made
+						}
+					}
+					for(i=0;i<starArray.length;i++){//draws the stars rotated
+						starArray[i].update();
+					}
+				}
+				if(level==6){
+					if(timerSpawn3.isReady()){//spawns clouds over time
+						if(cloudArray.length<20){
+							cloudArray.push(new cloudClass());
+							timerSpawn3 = new timerClass(randomNumber(2000,0));//randomly changes when the next star is made
+						}
+					}
+					for(i=0;i<cloudArray.length;i++){//draws the clouds rotated
+						cloudArray[i].update();
+					}
+				}
+				if(dead==true){
+					gameState="restart";
+					if(score>highscore){
+						highscore=score;
+					}
+				}
+				if(curkeys[80]){//p
+					gameState="pause";
+				}
+			}
+			if(gameState=="restart"){
+				if(newkeys[13]){//enter
+					reset();
+					gameState="intro";
+				}
+			}
+			if(gameState=="pause"){
+				if(newkeys[13]){//enter
+					gameState="play";
+				}
+			}
+			console.log(player.skin);
+			// Reset newkeys
+			for (i = 0; i < 256; i++){
+				newkeys[i] = false;
+			}
+			gameDraw();
+			window.requestAnimationFrame(gameUpdate);
+		}
+		function gameDraw(){
+			c.clearRect(0,0,cWidth,cHeight);
+			//Rotate Rectangles
+			c.save();
+			c.translate(cWidth/2,cHeight/2);//Rotates from the middle
+			c.rotate(degrees*Math.PI/180);//Rotates based on the degrees variable
+			//Add Gradient Rect (the 'ground')
+			var my_gradient=c.createLinearGradient(0,-1000,0,cHeight-100);
+				my_gradient.addColorStop(0,bgGradientArray1[level]);
+				my_gradient.addColorStop(1,bgGradientArray2[level]);
+			c.fillStyle=my_gradient;
+			c.fillRect(0,-1000,-cWidth,cHeight+1000);
+			c.fillRect(-1000,-1000,cWidth*2,cHeight+1000);
+			//Add Rectangle (the 'sky')
+			c.fillStyle=skyColorArray[level];
+			c.fillRect(-2000,-100,cWidth*5,1000);//X and Y work normally, except Y is opposite and offput by 500
+			//Numbers don't mean anything, they are like that because it looks right
+			if(level==2){
+				for(i=0;i<starArray.length;i++){//draws the stars rotated
+					starArray[i].draw();
+				}
+			}
+			if(level==6){
+				for(i=0;i<cloudArray.length;i++){//draws the clouds rotated
+					cloudArray[i].draw();
+				}
+			}
+			c.restore();
+			//Second rotate for the Cubes
+			c.save();
+			c.translate(cWidth/2,(cHeight/2)+500);//Rotates from the middle
+			c.rotate(degrees2*Math.PI/180);
+			for(i=0;i<loopAmount;i++){//draws the squares rotated
+				squareArray[i].draw();
+			}
+			c.restore();//Everything after this won't rotate
+			
+			if(gameState=="intro"){
+				c.drawImage(menuImg,-40,-35,cWidth+75,cHeight+70);
+				c.font = 100 + "px Rockwell Extra Bold";
+				c.textAlign = "center";
+				c.fillStyle = "#FFFFFF";
+				inputText = "C U B E T E R R A I N";
+				c.fillText(inputText,cWidth/2,cHeight/2);
+				c.font = 20 + "px Rockwell Extra Bold";
+				inputText = "Use the left and right arrow keys to dodge cubes";
+				c.fillText(inputText,cWidth/2,(cHeight/2)+120);
+				inputText = "Press P to pause, and the enter key to start";
+				c.fillText(inputText,cWidth/2,cHeight/2+140);
+				if(highscore>0){
+					inputText = "High score: " + highscore;
+					c.fillText(inputText,cWidth/2,cHeight/2+160);
+				}
+				inputText = "Press S to view the store";
+				c.fillText(inputText,cWidth/2,cHeight/2+180);
+				document.body.style.backgroundColor = "black";
+			}
+			if(gameState=="store"){
+				c.drawImage(menuImg,-40,-35,cWidth+75,cHeight+70);
+				c.font = 20 + "px Rockwell Extra Bold";
+				c.textAlign = "center";
+				c.fillStyle = "#FFFFFF";
+				inputText = "Welcome to the store! Here you can buy skins for your character using coins!";
+				c.fillText(inputText,cWidth/2,(cHeight/2)+240);
+				inputText = "To buy something, press the number corresponding to the item you want to buy";
+				c.fillText(inputText,cWidth/2,(cHeight/2)+260);
+				inputText = "Press S to return to the menu";
+				c.fillText(inputText,cWidth/2,(cHeight/2)+280);
+				if(coins==1){
+					inputText = "You have " + coins + " coin";
+				}
+				else{
+					inputText = "You have " + coins + " coins";
+				}
+				c.fillText(inputText,cWidth/2,(cHeight/2)-260);
+				
+				for(i=1;i<=5;i++){
+					var	storeImgInput = new Image();
+					if(i==3){
+						storeImgInput.src = "imgs/icon" + i + randomNumber(5,1) + ".png";
+					}
+					else{
+						storeImgInput.src = "imgs/icon" + i + ".png";
+					}
+					var xInput=300,
+						yInput=350,
+						widthInput=200,
+						heightInput=150,
+						fontSizeInput=20;
+					c.drawImage(storeImgInput,(xInput*i),yInput,widthInput,heightInput);
+					c.font = fontSizeInput + "px Rockwell Extra Bold";
+					inputText = "Skin " + i;
+					c.fillText(inputText,(xInput*i)+(widthInput/2),yInput-fontSizeInput);
+					c.fillStyle = "#000000";
+					c.fillRect(xInput*i,yInput+heightInput,widthInput,fontSizeInput+5);
+					c.fillStyle = "#FFFFFF";
+					if(i==player.skin){
+						inputText = "Equipped";
+						c.fillText(inputText,(xInput*i)+(widthInput/2),yInput+heightInput+fontSizeInput);
+					}
+					else if(boughtArray.includes(i)){
+						inputText = "Bought";
+						c.fillText(inputText,(xInput*i)+(widthInput/2),yInput+heightInput+fontSizeInput);
+					}
+					else{
+						if(priceArray[i]==1){
+							inputText = "Cost: " + priceArray[i] + " coin";
+						}
+						else{
+							inputText = "Cost: " + priceArray[i] + " coins";
+						}
+						c.fillText(inputText,(xInput*i)+(widthInput/2),yInput+heightInput+fontSizeInput);
+					}
+				}
+			}
+			if(gameState=="play"){
+				player.draw();
+				c.fillStyle = drawColorArray[level];
+				c.font = 25 + "px Magneto";
+				inputText = score;
+				c.fillText(inputText,0,25);
+				document.body.style.backgroundColor = skyColorArray[level];
+				if(visible){
+					if(timerHide.isReady()){
+						visible=false;
+					}
+					c.font = 50 + "px Rockwell Extra Bold";
+					c.textAlign = "center";
+					c.fillStyle = drawColorArray[level];
+					inputText = "Speed up!";
+					c.fillText(inputText,cWidth/2,cHeight/2);
+				}
+			}
+			if(gameState=="restart"){
+				player.draw();
+				c.drawImage(menuImg,-40,-35,cWidth+75,cHeight+70);
+				c.font = 100 + "px Rockwell Extra Bold";
+				c.textAlign = "center";
+				c.fillStyle = "#FFFFFF";
+				inputText = "G A M E O V E R";
+				c.fillText(inputText,cWidth/2,cHeight/2);
+				c.font = 20 + "px Rockwell Extra Bold";
+				inputText = "You scored: " + score + " Your high score is: " + highscore;
+				c.fillText(inputText,cWidth/2,(cHeight/2)+120);
+				inputText = "Press the enter key to continue";
+				c.fillText(inputText,cWidth/2,cHeight/2+140);
+				document.body.style.backgroundColor = "black";
+			}
+			if(gameState=="pause"){
+				player.draw();
+				c.drawImage(menuImg,-40,-35,cWidth+75,cHeight+70);
+				c.font = 100 + "px Rockwell Extra Bold";
+				c.textAlign = "center";
+				c.fillStyle = "#FFFFFF";
+				inputText = "P A U S E D";
+				c.fillText(inputText,cWidth/2,cHeight/2);
+				c.font = 20 + "px Rockwell Extra Bold";
+				inputText = "Press the enter key to continue";
+				c.fillText(inputText,cWidth/2,(cHeight/2)+120);
+				document.body.style.backgroundColor = "black";
+			}
+		}
+		function reset(){
+			degrees = -180,
+			degrees2 = 90,
+			charSpeed = 2,
+			cubeSpeed = 2,
+			xvelocity = 0,
+			scrollx = 0,
+			dead = false,
+			score = 0,
+			level = 1,
+			charSpeedArray = ["NA",2,2,2,2.5,2.5,3],
+			cubeSpeedArray = ["NA",2,3,3,3.5,3.75,4],
+			bgGradientArray1 = ["NA","black","black","black","white","black","white"],
+			bgGradientArray2 = ["NA","white","black","white","white","white","white"],
+			skyColorArray = ["NA","#FFFFFF","#000000","#FFFFFF","#FFFFFF","#FFFFFF","#FFFFFF"],
+			cubeImageArray1 = ["NA",3,4,3,5,3,6],
+			cubeImageArray2 = ["NA",1,4,1,5,1,6],
+			drawColorArray = ["NA","#000000","#FFFFFF","#000000","#000000","#000000","#000000"],
+			scoreLevelArray = ["NA",100000,200000,300000,400000,500000],
+			visible = false,
+			cubeSize = 5,
+			priceArray = ["NA",0,0,0,0,0];
+			
+			squareArray = [],//resets the cubes
+			loopAmount = 0,
+			timerSpawn = new timerClass(randomNumber(500,0)),
+			timerSpawn2 = new timerClass(randomNumber(0,0)),
+			timerSpawn3 = new timerClass(randomNumber(2000,0)),
+			timerHide = "";
+		}
+		function buy(input){
+			if(boughtArray.includes(input)==false){
+				if(coins>=priceArray[input]){
+					boughtArray.push(input);
+					player.skin=input;
+					coins-=priceArray[input];
+					window.alert("Success! You've bought skin " + input + "!");
+				}
+				else{
+					window.alert("You don't have enough money to buy this skin!");
+				}
+			}
+			else{
+				if(player.skin==input){
+					window.alert("This skin is already equipped!");
+				}
+				else{
+					window.alert("You are now using skin " + input + "!");
+					player.skin=input;
+				}
+			}
+		}
+		function randomNumber(upper,lower){
+			return Math.floor((Math.random() * ((upper+1) - lower)) + lower);
+		}
+	</script>
+</head>
+<body onload="gameFrameworkInit()">
+	<canvas id="myCanvas" width="" height=""></canvas>
+</body>
+</html>
