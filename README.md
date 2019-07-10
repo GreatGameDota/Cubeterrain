@@ -1,2 +1,2 @@
 # Cubeterrain
-Simple JS game made for a beginners HTML course
+Simple JS game made for a beginners HTML course based of the game Cuberunner
