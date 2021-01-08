@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Cubeterrain</title><!-- PB: 1,141,900 -->
-	<link rel="icon" type="image/x-icon" href="imgs/icon1.png">
+	<link rel="icon" type="image/x-icon" href="images/icon1.png">
 	<style>
 		canvas{
 			background: #ffffff;
@@ -10,7 +10,7 @@
 	</style>
 	<script>
 		var	menuImg = new Image();
-			menuImg.src = "imgs/menu1.png";
+			menuImg.src = "images/menu1.png";
 		var timerSpawn = new timerClass(randomNumber(500,0)),//cubes
 			timerSpawn2 = new timerClass(randomNumber(0,0)),//stars
 			timerSpawn3 = new timerClass(randomNumber(2000,0)),//clouds
@@ -50,7 +50,7 @@
 			this.height = 172/10;
 			var randImage = randomNumber(cubeImageArray1[level],cubeImageArray2[level]);//random image
 			this.img = new Image();
-			this.img.src = "imgs/cube" + randImage + ".png";
+			this.img.src = "images/cube" + randImage + ".png";
 
 			this.draw = function(){
 				c.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -76,7 +76,7 @@
 				this.height = 172/10;
 				var randImage = randomNumber(cubeImageArray1[level],cubeImageArray2[level]);
 				this.img = new Image();
-				this.img.src = "imgs/cube" + randImage + ".png";
+				this.img.src = "images/cube" + randImage + ".png";
 			}
 			this.intersects = function(obj){
 				if (this.x+25 < obj.x + obj.width &&
@@ -100,16 +100,16 @@
 			this.skin = 1;
 			
 			this.img = new Image();
-			this.img.src = "imgs/icon" + this.skin + ".png";
+			this.img.src = "images/icon" + this.skin + ".png";
 
 			this.draw = function(){
 				if(this.skin!=3){
 					this.img = new Image();
-					this.img.src = "imgs/icon" + this.skin + ".png";
+					this.img.src = "images/icon" + this.skin + ".png";
 				}
 				else{
 					this.img = new Image();
-					this.img.src = "imgs/icon3" + randomNumber(5,1) + ".png";
+					this.img.src = "images/icon3" + randomNumber(5,1) + ".png";
 				}
 				c.drawImage(this.img,(cWidth/2)-48,cHeight-80,this.width,this.height);
 			}
@@ -121,7 +121,7 @@
 			this.width = randomNumber(32,8);
 			this.height = this.width;
 			this.img = new Image();
-			this.img.src = "imgs/star.png";
+			this.img.src = "images/star.png";
 
 			this.draw = function(){
 				c.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -138,7 +138,7 @@
 				this.width = 32/5;
 				this.height = this.width;
 				this.img = new Image();
-				this.img.src = "imgs/star.png";
+				this.img.src = "images/star.png";
 			}
 		}
 		var cloudArray = [];
@@ -148,7 +148,7 @@
 			this.width = 1988/1000;//
 			this.height = 1290/1000;
 			this.img = new Image();
-			this.img.src = "imgs/cloud.png";
+			this.img.src = "images/cloud.png";
 
 			this.draw = function(){
 				c.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -169,7 +169,7 @@
 				this.width = 32/5;//
 				this.height = this.width;
 				this.img = new Image();
-				this.img.src = "imgs/cloud.png";
+				this.img.src = "images/cloud.png";
 			}
 		}
 		var c;
@@ -431,10 +431,10 @@
 				for(i=1;i<=5;i++){
 					var	storeImgInput = new Image();
 					if(i==3){
-						storeImgInput.src = "imgs/icon" + i + randomNumber(5,1) + ".png";
+						storeImgInput.src = "images/icon" + i + randomNumber(5,1) + ".png";
 					}
 					else{
-						storeImgInput.src = "imgs/icon" + i + ".png";
+						storeImgInput.src = "images/icon" + i + ".png";
 					}
 					var xInput=300,
 						yInput=350,
